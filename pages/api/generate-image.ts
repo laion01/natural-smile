@@ -1,13 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-
-import fs from "fs";
-
-import path from "path";
-
 import multer from "multer";
-
 import { OpenAI } from "openai";
-import { File } from "fetch-blob/from.js";
 
 // Configure multer to save file temporarily
 const upload = multer({
@@ -54,13 +47,6 @@ export default async function handler(
     if (!file) {
       return res.status(400).json({ error: "No image uploaded" });
     }
-
-    // const imagePath = path.resolve(file.path);
-    // const imageBuffer = fs.readFileSync(imagePath);
-
-    // const imageFile = new File([imageBuffer], file.originalname, {
-    //   type: "image/png",
-    // });
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY!,
