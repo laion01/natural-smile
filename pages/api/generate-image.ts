@@ -11,15 +11,10 @@ import { File } from "fetch-blob/from.js";
 
 // Configure multer to save file temporarily
 const upload = multer({
-  dest: "/tmp",
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === "image/png") {
-      cb(null, true);
-    } else {
-      cb(new Error("Only PNG files are allowed"));
-    }
-  },
+  storage: multer.memoryStorage(), // Store in memory, not in /tmp
+  limits: { fileSize: 10 * 1024 * 1024 }, // Max 10MB
 });
+
 
 // Disable default body parsing to use multer
 export const config = {
@@ -60,12 +55,12 @@ export default async function handler(
       return res.status(400).json({ error: "No image uploaded" });
     }
 
-    const imagePath = path.resolve(file.path);
-    const imageBuffer = fs.readFileSync(imagePath);
+    // const imagePath = path.resolve(file.path);
+    // const imageBuffer = fs.readFileSync(imagePath);
 
-    const imageFile = new File([imageBuffer], file.originalname, {
-      type: "image/png",
-    });
+    // const imageFile = new File([imageBuffer], file.originalname, {
+    //   type: "image/png",
+    // });
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY!,
@@ -75,7 +70,7 @@ export default async function handler(
       model: "dall-e-2",
       prompt:
         "Enhance the teeth in this selfie. Keep the original smile, facial expression, lighting, skin tone, and background exactly the same. Only improve the teeth by whitening, aligning, and making them look naturally beautiful and realistic. Do not modify any other part of the image.",
-      image: imageFile,
+      image: file.buffer as any,
     });
 
     const imageUrl = response.data?.[0]?.url;
